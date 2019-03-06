@@ -1,58 +1,59 @@
 data1 segment
 	;program variabile
 	;lenght, name, end char, decimal value
-	$zero db 4d, "zero", "$", 0d
-	$one db 5d, "jeden", "$", 1d
-	$two db 3d, "dwa", "$", 2d
-	$three db 4d, "trzy", "$", 3d
-	$four db 6d, "cztery", "$", 4d
-	$five db 5d, "piec ", "$", 5d
-	$six db 6d, "szesc ", "$", 6d
-	$seven db 7d, "siedem ", "$", 7d
-	$eight db 6d, "osiem ", "$", 8d
-	$nine db 9d, "dziewiec ", "$", 9d
-	$ten db 9d, "dziesiec ", "$", 10d
-	$twent db 11d, "dwadziesci ", "$", 20d
-	$thirty db 12d, "trzydziesci ", "$", 30d
-	$forty db 13d, "czterdziesci ", "$", 40d
-	$fifty db 12d, "piedziesiat ", "$", 50d
-	$sixty db 14d, "szescdziesiat ", "$", 60d
-	$seventy db 15d, "siedemdziesiat ", "$", 70d
-	$eighty db 14d, "osiemdziesiat ", "$", 80d
-	$ninety db 16d, "dziewiedziesiat ", "$", 90d
-	$hundred db 4d, "sto ", "$", 100d
+	$zero 		db 4d, "zero", "$", 0d
+	$one 		db 5d, "jeden", "$", 1d
+	$two 		db 3d, "dwa", "$", 2d
+	$three 		db 4d, "trzy", "$", 3d
+	$four 		db 6d, "cztery", "$", 4d
+	$five 		db 5d, "piec ", "$", 5d
+	$six 		db 6d, "szesc ", "$", 6d
+	$seven 		db 7d, "siedem ", "$", 7d
+	$eight 		db 6d, "osiem ", "$", 8d
+	$nine 		db 9d, "dziewiec ", "$", 9d
+	$ten 		db 9d, "dziesiec ", "$", 10d
+	$twent 		db 11d, "dwadziesci ", "$", 20d
+	$thirty 	db 12d, "trzydziesci ", "$", 30d
+	$forty 		db 13d, "czterdziesci ", "$", 40d
+	$fifty 		db 12d, "piedziesiat ", "$", 50d
+	$sixty 		db 14d, "szescdziesiat ", "$", 60d
+	$seventy 	db 15d, "siedemdziesiat ", "$", 70d
+	$eighty 	db 14d, "osiemdziesiat ", "$", 80d
+	$ninety 	db 16d, "dziewiedziesiat ", "$", 90d
+	$hundred 	db 4d, "sto ", "$", 100d
 	
-	$plus db 4d, "plus", "$"
-	$minus db 5d, "minus", "$"
-	$miltiply db 4d, "razy", "$"
-	$intro db "Entry equal: ", 10, 13, "$"
-	$error db 10, 13, "Incorrect data $"
+	$plus 		db 4d, "plus", "$"
+	$minus 		db 5d, "minus", "$"
+	$miltiply 	db 4d, "razy", "$"
+	$intro 		db "Entry equal: ", 10, 13, "$"
+	$error 		db 10, 13, "Incorrect data $"
 	
-	$debug db 10, 13, "mleko", 10, 13, "$"
-	$debug1 db 10, 13, "tak", 10, 13, "$"
-	$debug2 db 10, 13, "nie", 10, 13, "$"
+	$debug 		db 10, 13, "mleko", 10, 13, "$"
+	$debug1 	db 10, 13, "tak", 10, 13, "$"
+	$debug2 	db 10, 13, "nie", 10, 13, "$"
+	$debug3 	db 10, 13, "ok", 10, 13, "$"
 	
 	;bufor for user input
 	$buffer db 26 ;maksymalna dozwolona liczba znaków
 		    db ? ;liczba podanych znaków
 		    db 26 dup(0) ;znaki podane przez uzytkownika
 	
-	$arg1_start db 0
-	$arg1_end db 0
-	$arg1_value db 0
+	$arg1_start 	db 0
+	$arg1_end 		db 0
+	$arg1_value 	db 0
 	
-	$arg2_start db 0
-	$arg2_end db 0
-	$arg2_value db 0
+	$arg2_start 	db 0
+	$arg2_end 		db 0
+	$arg2_value 	db 0
 	
-	$arg3_start db 0
-	$arg3_end db 0
-	$arg3_value db 0
+	$arg3_start 	db 0
+	$arg3_end 		db 0
+	$arg3_value 	db 0
 	
-	$firstNum db 0
-	$secund db 0
-	$opertion db 0
-	$lastPosition db 0
+	$firstNum 		db 0
+	$secund 		db 0
+	$opertion 		db 0
+	$lastPosition 	db 0
 data1 ends
 
 code1 segment
@@ -69,18 +70,16 @@ code1 segment
 		;wyznaczanie pointerów na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
-		
 		;----------------------------------------------------------
 		;szukanie wskazników na pierwszy argument
 		;inicjalizowanie rejestrów
 		mov dl, $buffer[1] ;size of input buffer
 		mov dh, 0 ;counter of loop iteration
-		
-		mov bx, offset $buffer[2]
-		mov ch, $buffer[bx]		
+		mov bx, 2;set index of start buffer string
 		find_arg1:
+			mov ch, $buffer[bx]; loat char from buffer on index bx to ch	
 			;jesli napotkano spacje
-			cmp ch, ' '
+			cmp ch, 32 ;32 - asci code of space
 			je detect_arg1
 			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
@@ -93,17 +92,19 @@ code1 segment
 		;show information about error and end program
 		detect_arg1:
 			mov byte ptr $arg1_start, 0
+			dec dh ;because dh pointer on space
 			mov byte ptr $arg1_end, dh
+			inc dh
 			
 		;----------------------------------------------------------
 		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
-		mov ch, $buffer[bx]
-		mov byte ptr $arg2_start, bx
+		mov byte ptr $arg2_start, dh
 		find_arg2:
+			mov ch, $buffer[bx]
 			;jesli napotkano spacje
-			cmp ch, ' '
+			cmp ch, 32
 			je detect_arg2
 			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
@@ -115,26 +116,81 @@ code1 segment
 	
 		;show information about error and end program
 		detect_arg2:
+			dec dh ;because dh pointer on space
 			mov byte ptr $arg2_end, dh
+			inc dh
 			
 		;----------------------------------------------------------
 		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
-		mov ch, $buffer[bx]
-		mov byte ptr $arg3_start, bx
+		mov byte ptr $arg3_start, dh
 		find_arg3:
+			mov ch, $buffer[bx]
 			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je detect_arg3
 			
-			inc cl ;move both pointer to next char of string
+			inc bx ;move both pointer to next char of string
 			inc dh ;increment loop index
-		jmp find_arg2
+		jmp find_arg3
 	
 		;show information about error and end program
 		detect_arg3:
+			dec dh ;because dh pointer on space
 			mov byte ptr $arg3_end, dh
+			inc dh
+		
+		;----------------------------------------------------------
+		;rozpoznawanie wartosci wszystkich 3 argumentów
+		;----------------------------------------------------------
+		
+		;----------------------------------------------------------
+		;compare arg1 to $one
+		mov bx, 2; $buffer[2] iterate over each char in buffer
+		mov si, 1; $one[1]
+		mov dh, byte ptr $arg1_start
+		mov dl, byte ptr $arg1_end
+		
+		;calculate lenght of arg1
+		mov ch, dl
+		sub ch, dh
+		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
+		mov ah, ch ;ah contains lenght of arg1
+		
+		;sprawdz czy dlugosci sa takie same
+		cmp ah, $one[0]
+		jne end_compare1
+		
+		;if have the same lenght
+		compare_to_one:
+			mov ch, $buffer[bx]
+			mov cl, $one[si]
+			
+			cmp ch, cl
+			jne end_compare1
+			
+			cmp dh, dl
+			je is_one
+			
+			inc bx ;increment index char of buffer
+			inc si ; increment index char of program string 
+			inc dh ;increment loop index
+		jmp compare_to_one
+		
+		is_one:
+			mov byte ptr $arg1_value, 1
+			
+		end_compare1:
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		;----------------------------------------------------------
@@ -243,6 +299,14 @@ code1 segment
 		mov dx, seg $debug2
 		mov ds, dx ; segment do ds
 		mov dx, offset $debug2                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		ret
+		
+	print_debug3:
+		mov dx, seg $debug3
+		mov ds, dx ; segment do ds
+		mov dx, offset $debug3                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		ret
