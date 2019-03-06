@@ -6,25 +6,26 @@ data1 segment
 	$two 		db 3d, "dwa", "$", 2d
 	$three 		db 4d, "trzy", "$", 3d
 	$four 		db 6d, "cztery", "$", 4d
-	$five 		db 5d, "piec ", "$", 5d
-	$six 		db 6d, "szesc ", "$", 6d
-	$seven 		db 7d, "siedem ", "$", 7d
-	$eight 		db 6d, "osiem ", "$", 8d
-	$nine 		db 9d, "dziewiec ", "$", 9d
-	$ten 		db 9d, "dziesiec ", "$", 10d
-	$twent 		db 11d, "dwadziesci ", "$", 20d
-	$thirty 	db 12d, "trzydziesci ", "$", 30d
-	$forty 		db 13d, "czterdziesci ", "$", 40d
-	$fifty 		db 12d, "piedziesiat ", "$", 50d
-	$sixty 		db 14d, "szescdziesiat ", "$", 60d
-	$seventy 	db 15d, "siedemdziesiat ", "$", 70d
-	$eighty 	db 14d, "osiemdziesiat ", "$", 80d
-	$ninety 	db 16d, "dziewiedziesiat ", "$", 90d
-	$hundred 	db 4d, "sto ", "$", 100d
+	$five 		db 4d, "piec", "$", 5d
+	$six 		db 5d, "szesc", "$", 6d
+	$seven 		db 6d, "siedem", "$", 7d
+	$eight 		db 5d, "osiem", "$", 8d
+	$nine 		db 8d, "dziewiec", "$", 9d
+	$ten 		db 8d, "dziesiec", "$", 10d
+	$twent 		db 10d, "dwadziesci", "$", 20d
+	$thirty 	db 11d, "trzydziesci", "$", 30d
+	$forty 		db 12d, "czterdziesci", "$", 40d
+	$fifty 		db 11d, "piedziesiat", "$", 50d
+	$sixty 		db 13d, "szescdziesiat", "$", 60d
+	$seventy 	db 14d, "siedemdziesiat", "$", 70d
+	$eighty 	db 13d, "osiemdziesiat", "$", 80d
+	$ninety 	db 15d, "dziewiedziesiat", "$", 90d
+	$hundred 	db 3d, "sto", "$", 100d
 	
-	$plus 		db 4d, "plus", "$"
-	$minus 		db 5d, "minus", "$"
-	$miltiply 	db 4d, "razy", "$"
+	$plus 		db 4d, "plus", "$", 1d
+	$minus 		db 5d, "minus", "$", 2d
+	$miltiply 	db 4d, "razy", "$", 3d
+	
 	$intro 		db "Entry equal: ", 10, 13, "$"
 	$error 		db 10, 13, "Incorrect data $"
 	
@@ -34,9 +35,9 @@ data1 segment
 	$debug3 	db 10, 13, "ok", 10, 13, "$"
 	
 	;bufor for user input
-	$buffer db 26 ;maksymalna dozwolona liczba znaków
-		    db ? ;liczba podanych znaków
-		    db 26 dup(0) ;znaki podane przez uzytkownika
+	$buffer 	db 26 ;maksymalna dozwolona liczba znaków
+				db ? ;liczba podanych znaków
+				db 26 dup(0) ;znaki podane przez uzytkownika
 	
 	$arg1_start 	db 0
 	$arg1_end 		db 0
@@ -49,11 +50,7 @@ data1 segment
 	$arg3_start 	db 0
 	$arg3_end 		db 0
 	$arg3_value 	db 0
-	
-	$firstNum 		db 0
-	$secund 		db 0
-	$opertion 		db 0
-	$lastPosition 	db 0
+
 data1 ends
 
 code1 segment
@@ -145,111 +142,42 @@ code1 segment
 		;rozpoznawanie wartosci wszystkich 3 argumentów
 		;----------------------------------------------------------
 		
-		;----------------------------------------------------------
-		;compare arg1 to $one
-		mov bx, 2; $buffer[2] iterate over each char in buffer
-		mov si, 1; $one[1]
-		mov dh, byte ptr $arg1_start
-		mov dl, byte ptr $arg1_end
+		;create switch for arg1
+		mov di, offset $zero
+		call compare_for_arg1_fn
 		
-		;calculate lenght of arg1
-		mov ch, dl
-		sub ch, dh
-		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
-		mov ah, ch ;ah contains lenght of arg1
+		mov di, offset $one
+		call compare_for_arg1_fn
 		
-		;sprawdz czy dlugosci sa takie same
-		cmp ah, $one[0]
-		jne end_compare1
+		mov di, offset $two
+		call compare_for_arg1_fn
 		
-		;if have the same lenght
-		compare_to_one:
-			mov ch, $buffer[bx]
-			mov cl, $one[si]
-			
-			cmp ch, cl
-			jne end_compare1
-			
-			cmp dh, dl
-			je is_one
-			
-			inc bx ;increment index char of buffer
-			inc si ; increment index char of program string 
-			inc dh ;increment loop index
-		jmp compare_to_one
+		mov di, offset $three
+		call compare_for_arg1_fn
 		
-		is_one:
-			mov byte ptr $arg1_value, 1
-			
-		end_compare1:
+		mov di, offset $four
+		call compare_for_arg1_fn
 		
+		mov di, offset $five
+		call compare_for_arg1_fn
 		
+		mov di, offset $six
+		call compare_for_arg1_fn
 		
+		mov di, offset $seven
+		call compare_for_arg1_fn
 		
+		mov di, offset $eight
+		call compare_for_arg1_fn
 		
+		mov di, offset $nine
+		call compare_for_arg1_fn
 		
+		end_switch1:
 		
+		end_switch2:
 		
-		
-		
-		
-		;----------------------------------------------------------
-		;rozpoznawanie jednego wyrazu
-		;----------------------------------------------------------
-		
-		
-		;inicjowanie rejestrów dla rozpoznanych liczby
-		mov ch, 0
-		mov cl, 0
-		
-		;skorzystam z rejestrów al, ah, oraz wiekszych si, di
-		;sprawdzam dlugosc wyrazów
-		mov dl, $buffer[1]
-		mov dh, $one[0]
-		cmp dl, dh
-		jne if_not_equal_1
-		jmp if_equal_1
-		
-		if_not_equal_1:
-			call print_debug
-			jmp end_if_1
-		if_equal_1:
-			;przypisanie pierwszego znaku z porównywanego stringa do rejestru
-			mov bl, $buffer[2]			
-			mov bh, $one[1]
-			mov dh, 0
-			
-			;petla sprawdza po kolei reszte znakoow
-			loop_1:
-				;if all characters is the same words are equals
-				cmp dl, dh
-				je string_is_the_same
-			
-				cmp bl, bh ;compare chars from both string
-				jne not_equal_chars_1 ;break loop if not equal
-				
-				;move both pointer to next
-				inc bl
-				inc bh
-				;increment loop index
-				inc dh
-				;make loop
-				jmp loop_1
-			
-			string_is_the_same:
-				call print_debug1
-				jmp end_loop_1
-				
-			not_equal_chars_1:	
-				call print_debug2
-				jmp end_loop_1
-				
-			end_loop_1:
-			
-			jmp end_if_1
-			
-		end_if_1:
-			jmp end_program
+		;recognise erythmetic opertion
 		
 		; zakoncz program
 		end_program:
@@ -267,6 +195,7 @@ code1 segment
 		int 21h
 		ret
 		
+	;-----------------------------------------------------	
 	print_incorrect_data_info:
 		mov dx, seg $error
 		mov ds, dx ; segment do ds
@@ -275,9 +204,113 @@ code1 segment
 		int 21h
 		ret
 		
+	;-----------------------------------------------------	
 	throw_exception:
 		call print_incorrect_data_info
 		jmp end_program
+	
+	;-----------------------------------------------------	
+	;arg
+	;mov di, offset $<variabile name>
+	compare_for_arg1_fn:
+		;compare arg1 to $one
+		mov bx, 2; $buffer[2] iterate over each char in buffer
+		mov si, 1; $one[1]
+		mov dh, byte ptr $arg1_start
+		mov dl, byte ptr $arg1_end
+		
+		;calculate lenght of arg1
+		mov ch, dl
+		sub ch, dh
+		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
+		mov ah, ch ;ah contains lenght of arg1
+		
+		;sprawdz czy dlugosci sa takie same
+		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
+		cmp ah, [di]
+		jne end_compare1
+		
+		inc di;go to first char of string
+		;if have the same lenght
+		compare_to1:
+			mov ch, $buffer[bx] 
+			mov cl, [di]
+			
+			cmp ch, cl
+			jne end_compare1
+			
+			cmp dh, dl
+			je is_detect1
+			
+			inc bx ;increment index char of buffer
+			inc di ; increment index char of program string 
+			inc dh ;increment loop index
+		jmp compare_to1
+		
+		is_detect1:
+			;move to posithion with deceminal value
+			inc di
+			inc di
+			mov al, [di]
+			mov byte ptr $arg1_value, al
+			;end switch
+			jmp end_switch1
+			
+		end_compare1:
+		ret
+		
+	;-----------------------------------------------------	
+	;arg
+	;mov di, offset $<variabile name>
+	compare_for_arg2_fn:
+		;compare arg1 to $one
+		mov bx, 2; $buffer[2] iterate over each char in buffer
+		mov si, 1; $one[1]
+		mov dh, byte ptr $arg2_start
+		mov dl, byte ptr $arg2_end
+		
+		;calculate lenght of arg1
+		mov ch, dl
+		sub ch, dh
+		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
+		mov ah, ch ;ah contains lenght of arg1
+		
+		;sprawdz czy dlugosci sa takie same
+		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
+		cmp ah, [di]
+		jne end_compare2
+		
+		inc di;go to first char of string
+		;if have the same lenght
+		compare_to2:
+			mov ch, $buffer[bx] 
+			mov cl, [di]
+			
+			cmp ch, cl
+			jne end_compare2
+			
+			cmp dh, dl
+			je is_detect2
+			
+			inc bx ;increment index char of buffer
+			inc di ; increment index char of program string 
+			inc dh ;increment loop index
+		jmp compare_to2
+		
+		is_detect2:
+			;move to posithion with deceminal value
+			inc di
+			inc di
+			mov al, [di]
+			mov byte ptr $arg2_value, al
+			;end switch
+			jmp end_switch2
+			
+		end_compare2:
+		ret
+		
+	;-----------------------------------------------------	
+	;debug function
 		
 	print_debug:
 		mov dx, seg $debug
