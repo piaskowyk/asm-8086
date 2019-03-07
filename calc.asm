@@ -142,7 +142,7 @@ code1 segment
 		;rozpoznawanie wartosci wszystkich 3 argumentów
 		;----------------------------------------------------------
 		
-		;create switch for arg1
+		;create switch for arg1 (number)
 		mov di, offset $zero
 		call compare_for_arg1_fn
 		
@@ -175,9 +175,57 @@ code1 segment
 		
 		end_switch1:
 		
+		;recognise erythmetic opertion
+		mov di, offset $plus
+		call compare_for_arg2_fn
+		
+		mov di, offset $minus
+		call compare_for_arg2_fn
+		
+		mov di, offset $miltiply
+		call compare_for_arg2_fn
+		
 		end_switch2:
 		
-		;recognise erythmetic opertion
+		;recognise arg3 (number)
+		
+		mov di, offset $zero
+		call compare_for_arg3_fn
+		
+		mov di, offset $one
+		call compare_for_arg3_fn
+		
+		mov di, offset $two
+		call compare_for_arg3_fn
+		
+		mov di, offset $three
+		call compare_for_arg3_fn
+		
+		mov di, offset $four
+		call compare_for_arg3_fn
+		
+		mov di, offset $five
+		call compare_for_arg3_fn
+		
+		mov di, offset $six
+		call compare_for_arg3_fn
+		
+		mov di, offset $seven
+		call compare_for_arg3_fn
+		
+		mov di, offset $eight
+		call compare_for_arg3_fn
+		
+		mov di, offset $nine
+		call compare_for_arg3_fn
+		
+		end_switch3:
+		
+		;----------------------------------------------------------
+		;do arythmetic operation
+		;----------------------------------------------------------
+		
+		
 		
 		; zakoncz program
 		end_program:
@@ -264,7 +312,8 @@ code1 segment
 	;mov di, offset $<variabile name>
 	compare_for_arg2_fn:
 		;compare arg1 to $one
-		mov bx, 2; $buffer[2] iterate over each char in buffer
+		mov al, byte ptr $arg2_start
+		mov bx, ax; $buffer[2] iterate over each char in buffer
 		mov si, 1; $one[1]
 		mov dh, byte ptr $arg2_start
 		mov dl, byte ptr $arg2_end
@@ -307,6 +356,57 @@ code1 segment
 			jmp end_switch2
 			
 		end_compare2:
+		ret
+		
+	;-----------------------------------------------------	
+	;arg
+	;mov di, offset $<variabile name>
+	compare_for_arg3_fn:
+		;compare arg1 to $one
+		mov al, byte ptr $arg3_start
+		mov bx, ax; $buffer[2] iterate over each char in buffer
+		mov si, 1; $one[1]
+		mov dh, byte ptr $arg3_start
+		mov dl, byte ptr $arg3_end
+		
+		;calculate lenght of arg1
+		mov ch, dl
+		sub ch, dh
+		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
+		mov ah, ch ;ah contains lenght of arg1
+		
+		;sprawdz czy dlugosci sa takie same
+		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
+		cmp ah, [di]
+		jne end_compare3
+		
+		inc di;go to first char of string
+		;if have the same lenght
+		compare_to3:
+			mov ch, $buffer[bx] 
+			mov cl, [di]
+			
+			cmp ch, cl
+			jne end_compare3
+			
+			cmp dh, dl
+			je is_detect3
+			
+			inc bx ;increment index char of buffer
+			inc di ; increment index char of program string 
+			inc dh ;increment loop index
+		jmp compare_to3
+		
+		is_detect3:
+			;move to posithion with deceminal value
+			inc di
+			inc di
+			mov al, [di]
+			mov byte ptr $arg3_value, al
+			;end switch
+			jmp end_switch3
+			
+		end_compare3:
 		ret
 		
 	;-----------------------------------------------------	
