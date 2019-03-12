@@ -14,6 +14,17 @@ data1 segment
 	$eight 		db 5d, "osiem", "$", 8d
 	$nine 		db 8d, "dziewiec", "$", 9d
 	$ten 		db 8d, "dziesiec", "$", 10d
+
+	$eleven		db 10d, "jedenascie", "$", 11d
+	$twelve		db 9d, "dwanascie", "$", 12d
+	$thirteen	db 10d, "trzynascie", "$", 13d
+	$fourteen	db 11d, "czternascie", "$", 14d
+	$fiveteen	db 10d, "pietnascie", "$", 15d
+	$sixteen	db 10d, "szesnascie", "$", 16d
+	$seventeen	db 12d, "siedemnascie", "$", 17d
+	$eighteen	db 11d, "osiemnascie", "$", 18d
+	$nineteen	db 14d, "dziewietnascie", "$", 19d
+
 	$twent 		db 10d, "dwadziesci", "$", 20d
 	$thirty 	db 11d, "trzydziesci", "$", 30d
 	$forty 		db 12d, "czterdziesci", "$", 40d
@@ -465,17 +476,19 @@ code1 segment
 		je print_0
 		
 		cmp al, 100
-		jg is_overflow
+		jae is_overflow
 		jmp continue
 		
 		is_overflow:
 			mov bx, 65535d
 			sub bx, ax
+			inc bl
 			mov byte ptr $result, bl
 			;print 'minus'
 			mov dx, seg $minus
 			mov ds, dx ; segment do ds
-			mov dx, offset $minus                                      
+			mov dx, offset $minus    
+			inc dx                                  
 			mov ah, 9 ; wypisz stringa pod adresem ds:dx
 			int 21h
 			
@@ -488,63 +501,90 @@ code1 segment
 		recognise_number_x10:
 			;if 10
 			mov al, dl
-			mov bl, 10
+			mov bl, 10d
 			div bl
 			cmp al, 0 ;in al is result of delivate
 			je print_10
+
+			cmp dl, 11d ;if 11
+			je print_11
+
+			cmp dl, 12d ;if 12
+			je print_12
+
+			cmp dl, 13d ;if 13
+			je print_13
+
+			cmp dl, 14d ;if 14
+			je print_14
+
+			cmp dl, 15d ;if 15
+			je print_15
+
+			cmp dl, 16d ;if 16
+			je print_16
+
+			cmp dl, 17d ;if 17
+			je print_17
+
+			cmp dl, 18d ;if 18
+			je print_18
+
+			cmp dl, 19d ;if 19
+			je print_19
 			
 			;if 20
 			mov al, dl
-			mov bl, 20
+			mov bl, 20d
 			div bl
 			cmp al, 0
 			je print_20
 			
 			;if 30
 			mov al, dl
-			mov bl, 30
+			mov bl, 30d
 			div bl
 			cmp al, 0
 			je print_30
 			
 			;if 40
 			mov al, dl
-			mov bl, 40
+			mov bl, 40d
 			div bl
 			cmp al, 0
 			je print_40
 			
 			;if 50
 			mov al, dl
-			mov bl, 50
+			mov bl, 50d
 			div bl
 			cmp al, 0
 			je print_50
 			
 			;if 60
 			mov al, dl
-			mov bl, 60
+			mov bl, 60d
 			div bl
 			cmp al, 0
 			je print_60
 			
 			;if 70
 			mov al, dl
-			mov bl, 70
+			mov bl, 70d
 			div bl
 			cmp al, 0
 			je print_70
 			
 			;if 80
 			mov al, dl
-			mov bl, 80
+			mov bl, 80d
 			div bl
 			cmp al, 0
 			je print_80
 			
 			;if 90
 			mov al, dl
-			mov bl, 90
+			mov bl, 90d
 			div bl
 			cmp al, 0
 			je print_90
@@ -559,62 +599,43 @@ code1 segment
 			;in dx is ax moulo 10
 			
 			;if 9
-			cmp dl, 9
+			cmp dl, 9d
 			je print_9
 			
 			;if 8
-			cmp dl, 8
+			cmp dl, 8d
 			je print_8
 			
 			;if 7
-			cmp dl, 7
+			cmp dl, 7d
 			je print_7
 			
 			;if 6
-			cmp dl, 6
-			je print_5
+			cmp dl, 6d
+			je print_6
 			
 			;if 5
-			cmp dl, 5
+			cmp dl, 5d
 			je print_5
 			
 			;if 4
-			cmp dl, 4
+			cmp dl, 4d
 			je print_4
 			
 			;if 3
-			cmp dl, 3
+			cmp dl, 3d
 			je print_3
 			
 			;if 2
-			cmp dl, 2
+			cmp dl, 2d
 			je print_2
 			
 			;if 1
-			cmp dl, 1
+			cmp dl, 1d
 			je print_1
 			
 		end_recognise_x1:
 
-		check_tail:
-			;counting modulo
-			mov dx, 0   
-			mov ax, 0
-			mov al, byte ptr $result
-			mov bx, 10
-			div bx 
-			;in dx is ax moulo 10, w ax znajduje się int ax/10, 15/10 = 1, ax = 1
-
-			cmp al, 1
-			je print_tail			
-
-		end_check_tail:
-		
-		;mov dx, seg $result
-		;mov ds, dx ; segment do ds
-		;mov dx, offset $result                                      
-		;mov ah, 9 ; wypisz stringa pod adresem ds:dx
-		;int 21h
 		ret
 	
 	;-----------------------------------------------------	
@@ -626,6 +647,78 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp recognise_number_x1
+
+	print_11:
+		mov dx, seg $eleven
+		mov ds, dx ; segment do ds
+		mov dx, offset $eleven                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_12:
+		mov dx, seg $twelve
+		mov ds, dx ; segment do ds
+		mov dx, offset $twelve                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_13:
+		mov dx, seg $thirteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $thirteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_14:
+		mov dx, seg $fourteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $fourteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_15:
+		mov dx, seg $fiveteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $fiveteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_16:
+		mov dx, seg $sixteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $sixteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_17:
+		mov dx, seg $seventeen
+		mov ds, dx ; segment do ds
+		mov dx, offset $seventeen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_18:
+		mov dx, seg $eighteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $eighteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
+
+	print_19:
+		mov dx, seg $nineteen
+		mov ds, dx ; segment do ds
+		mov dx, offset $nineteen                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_20:
 		mov dx, seg $twent
@@ -780,15 +873,6 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_program
-
-	print_tail:
-		mov dx, seg $tail
-		mov ds, dx ; segment do ds
-		mov dx, offset $tail    
-		inc dx	
-		mov ah, 9 ; wypisz stringa pod adresem ds:dx
-		int 21h
-		jmp end_check_tail
 		
 	;-----------------------------------------------------	
 	;debug function
