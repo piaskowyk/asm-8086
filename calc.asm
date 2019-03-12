@@ -1,5 +1,5 @@
-;TODO: trzba dodać możliwość dodawania wielu spacji czy tam tabulacji
-;jeśli wyjdzie mi result 15 to  x10 nie wykrywa tego bo przy podzieleniu przez 10 nie wyjdzie 0, 
+;TODO: dorobić obsługę wielu spacjii
+;TODO: optymalizacja, żeby skrócić kod
 data1 segment
 	;program variabile
 	;lenght, name, end char, decimal value
@@ -32,7 +32,6 @@ data1 segment
 	$sixty 		db 13d, "szescdziesiat", "$", 60d
 	$seventy 	db 14d, "siedemdziesiat", "$", 70d
 	$eighty 	db 13d, "osiemdziesiat", "$", 80d
-	$ninety 	db 15d, "dziewiedziesiat", "$", 90d
 	
 	$tail 		db 6d, "nascie", "$", 11d
 	$plus 		db 4d, "plus", "$", 1d
@@ -45,8 +44,8 @@ data1 segment
 	$debug 		db 10, 13, "mleko", 10, 13, "$"
 	
 	;bufor for user input
-	$buffer 	db 26 ;maksymalna dozwolona liczba znak�w
-				db ? ;liczba podanych znak�w
+	$buffer 	db 26 ;maksymalna dozwolona liczba znaków
+				db ? ;liczba podanych znaków
 				db 26 dup(0) ;znaki podane przez uzytkownika
 	
 	$arg1_start 	db 0
@@ -63,6 +62,7 @@ data1 segment
 	
 	$result_label 	db 10, 13, "Result operation:", 10, 13, "$"
 	$result 		db 0, "$"
+	$separator		db " $"
 	
 data1 ends
 
@@ -77,12 +77,12 @@ code1 segment
 		int 21h
 		
 		;----------------------------------------------------------
-		;wyznaczanie pointer�w na wszystkie 3 argumenty
+		;wyznaczanie pointerów na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
 		;----------------------------------------------------------
-		;szukanie wskaznik�w na pierwszy argument
-		;inicjalizowanie rejestr�w
+		;szukanie wskazników na pierwszy argument
+		;inicjalizowanie rejestrów
 		mov dl, $buffer[1] ;size of input buffer
 		mov dh, 0 ;counter of loop iteration
 		mov bx, 2;set index of start buffer string
@@ -91,7 +91,7 @@ code1 segment
 			;jesli napotkano spacje
 			cmp ch, 32 ;32 - asci code of space
 			je detect_arg1
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument�w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je throw_exception
 			
@@ -107,7 +107,7 @@ code1 segment
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskaznik�w na pierwszy argument
+		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		mov byte ptr $arg2_start, dh
@@ -116,7 +116,7 @@ code1 segment
 			;jesli napotkano spacje
 			cmp ch, 32
 			je detect_arg2
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument�w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je throw_exception
 			
@@ -131,13 +131,13 @@ code1 segment
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskaznik�w na pierwszy argument
+		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		mov byte ptr $arg3_start, dh
 		find_arg3:
 			mov ch, $buffer[bx]
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument�w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je detect_arg3
 			
@@ -152,7 +152,7 @@ code1 segment
 			inc dh
 		
 		;----------------------------------------------------------
-		;rozpoznawanie wartosci wszystkich 3 argument�w
+		;rozpoznawanie wartosci wszystkich 3 argumentów
 		;----------------------------------------------------------
 		
 		;create switch for arg1 (number)
@@ -274,7 +274,7 @@ code1 segment
 		
 		; zakoncz program
 		end_program:
-			mov	ax,04c00h  
+			mov	ax, 04c00h  
 			int	21h
 	
 	;=====================================================
@@ -494,16 +494,79 @@ code1 segment
 			
 		continue:
 		
-		cmp al, 9
+		cmp al, 19
 		jg recognise_number_x10
 		jmp recognise_number_x1
 		
-		recognise_number_x10:
-			;if 10
+		recognise_number_x10:			
+			;if 2_
+			mov dh, 0
+			mov ah, 0
 			mov al, dl
-			mov bl, 10d
+			mov bl, 30d
 			div bl
-			cmp al, 0 ;in al is result of delivate
+			cmp al, 0
+			je print_20
+			
+			;if 3_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 40d
+			div bl
+			cmp al, 0
+			je print_30
+			
+			;if 4_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 50d
+			div bl
+			cmp al, 0
+			je print_40
+			
+			;if 5_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 60d
+			div bl
+			cmp al, 0
+			je print_50
+			
+			;if 6_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 70d
+			div bl
+			cmp al, 0
+			je print_60
+			
+			;if 7_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 80d
+			div bl
+			cmp al, 0
+			je print_70
+			
+			;if 8_
+			mov dh, 0
+			mov ah, 0
+			mov al, dl
+			mov bl, 90d
+			div bl
+			cmp al, 0
+			je print_80
+		
+		end_recognise_number_x10:
+			call print_separator
+
+		recognise_number_x1:
+			cmp dl, 10d ;if 10
 			je print_10
 
 			cmp dl, 11d ;if 11
@@ -532,64 +595,7 @@ code1 segment
 
 			cmp dl, 19d ;if 19
 			je print_19
-			
-			;if 20
-			mov al, dl
-			mov bl, 20d
-			div bl
-			cmp al, 0
-			je print_20
-			
-			;if 30
-			mov al, dl
-			mov bl, 30d
-			div bl
-			cmp al, 0
-			je print_30
-			
-			;if 40
-			mov al, dl
-			mov bl, 40d
-			div bl
-			cmp al, 0
-			je print_40
-			
-			;if 50
-			mov al, dl
-			mov bl, 50d
-			div bl
-			cmp al, 0
-			je print_50
-			
-			;if 60
-			mov al, dl
-			mov bl, 60d
-			div bl
-			cmp al, 0
-			je print_60
-			
-			;if 70
-			mov al, dl
-			mov bl, 70d
-			div bl
-			cmp al, 0
-			je print_70
-			
-			;if 80
-			mov al, dl
-			mov bl, 80d
-			div bl
-			cmp al, 0
-			je print_80
-			
-			;if 90
-			mov al, dl
-			mov bl, 90d
-			div bl
-			cmp al, 0
-			je print_90
-		
-		recognise_number_x1:
+
 			;counting modulo
 			mov dx, 0   
 			mov ax, 0
@@ -643,15 +649,17 @@ code1 segment
 	print_10:
 		mov dx, seg $ten
 		mov ds, dx ; segment do ds
-		mov dx, offset $ten                                       
+		mov dx, offset $ten  
+		inc dx                                     
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_x1
 
 	print_11:
 		mov dx, seg $eleven
 		mov ds, dx ; segment do ds
-		mov dx, offset $eleven                                       
+		mov dx, offset $eleven    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -659,7 +667,8 @@ code1 segment
 	print_12:
 		mov dx, seg $twelve
 		mov ds, dx ; segment do ds
-		mov dx, offset $twelve                                       
+		mov dx, offset $twelve  
+		inc dx                                         
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -667,7 +676,8 @@ code1 segment
 	print_13:
 		mov dx, seg $thirteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $thirteen                                       
+		mov dx, offset $thirteen    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -675,7 +685,8 @@ code1 segment
 	print_14:
 		mov dx, seg $fourteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $fourteen                                       
+		mov dx, offset $fourteen   
+		inc dx                                        
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -683,7 +694,8 @@ code1 segment
 	print_15:
 		mov dx, seg $fiveteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $fiveteen                                       
+		mov dx, offset $fiveteen    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -691,7 +703,8 @@ code1 segment
 	print_16:
 		mov dx, seg $sixteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $sixteen                                       
+		mov dx, offset $sixteen      
+		inc dx                                     
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -699,7 +712,8 @@ code1 segment
 	print_17:
 		mov dx, seg $seventeen
 		mov ds, dx ; segment do ds
-		mov dx, offset $seventeen                                       
+		mov dx, offset $seventeen   
+		inc dx                                        
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -707,7 +721,8 @@ code1 segment
 	print_18:
 		mov dx, seg $eighteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $eighteen                                       
+		mov dx, offset $eighteen     
+		inc dx                                      
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -715,7 +730,8 @@ code1 segment
 	print_19:
 		mov dx, seg $nineteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $nineteen                                       
+		mov dx, offset $nineteen   
+		inc dx                                        
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_recognise_x1
@@ -723,66 +739,65 @@ code1 segment
 	print_20:
 		mov dx, seg $twent
 		mov ds, dx ; segment do ds
-		mov dx, offset $twent                                       
+		mov dx, offset $twent       
+		inc dx                                    
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_30:
 		mov dx, seg $thirty
 		mov ds, dx ; segment do ds
-		mov dx, offset $thirty                                       
+		mov dx, offset $thirty    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_40:
 		mov dx, seg $forty
 		mov ds, dx ; segment do ds
-		mov dx, offset $forty                                       
+		mov dx, offset $forty        
+		inc dx                                   
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_50:
 		mov dx, seg $fifty
 		mov ds, dx ; segment do ds
-		mov dx, offset $fifty                                       
+		mov dx, offset $fifty    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_60:
 		mov dx, seg $sixty
 		mov ds, dx ; segment do ds
-		mov dx, offset $sixty                                       
+		mov dx, offset $sixty      
+		inc dx                                     
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_70:
 		mov dx, seg $seventy
 		mov ds, dx ; segment do ds
-		mov dx, offset $seventy                                       
+		mov dx, offset $seventy    
+		inc dx                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_80:
 		mov dx, seg $eighty
 		mov ds, dx ; segment do ds
-		mov dx, offset $eighty                                       
+		mov dx, offset $eighty      
+		inc dx                                     
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		jmp recognise_number_x1
-		
-	print_90:
-		mov dx, seg $ninety
-		mov ds, dx ; segment do ds
-		mov dx, offset $ninety                                       
-		mov ah, 9 ; wypisz stringa pod adresem ds:dx
-		int 21h
-		jmp recognise_number_x1
+		jmp end_recognise_number_x10
 		
 	print_1:
 		mov dx, seg $one
@@ -881,6 +896,14 @@ code1 segment
 		mov dx, seg $debug
 		mov ds, dx ; segment do ds
 		mov dx, offset $debug                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		ret
+
+	print_separator:
+		mov dx, seg $separator
+		mov ds, dx ; segment do ds
+		mov dx, offset $separator                                       
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		ret
