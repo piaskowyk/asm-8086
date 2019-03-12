@@ -1,3 +1,5 @@
+;TODO: trzba dodaÄ‡ moÅ¼liwoÅ›Ä‡ dodawania wielu spacji czy tam tabulacji
+;jeÅ›li wyjdzie mi result 15 to  x10 nie wykrywa tego bo przy podzieleniu przez 10 nie wyjdzie 0, 
 data1 segment
 	;program variabile
 	;lenght, name, end char, decimal value
@@ -20,8 +22,8 @@ data1 segment
 	$seventy 	db 14d, "siedemdziesiat", "$", 70d
 	$eighty 	db 13d, "osiemdziesiat", "$", 80d
 	$ninety 	db 15d, "dziewiedziesiat", "$", 90d
-	$hundred 	db 3d, "sto", "$", 100d
 	
+	$tail 		db 6d, "nascie", "$", 11d
 	$plus 		db 4d, "plus", "$", 1d
 	$minus 		db 5d, "minus", "$", 2d
 	$miltiply 	db 4d, "razy", "$", 3d
@@ -32,8 +34,8 @@ data1 segment
 	$debug 		db 10, 13, "mleko", 10, 13, "$"
 	
 	;bufor for user input
-	$buffer 	db 26 ;maksymalna dozwolona liczba znaków
-				db ? ;liczba podanych znaków
+	$buffer 	db 26 ;maksymalna dozwolona liczba znakï¿½w
+				db ? ;liczba podanych znakï¿½w
 				db 26 dup(0) ;znaki podane przez uzytkownika
 	
 	$arg1_start 	db 0
@@ -64,12 +66,12 @@ code1 segment
 		int 21h
 		
 		;----------------------------------------------------------
-		;wyznaczanie pointerów na wszystkie 3 argumenty
+		;wyznaczanie pointerï¿½w na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
-		;inicjalizowanie rejestrów
+		;szukanie wskaznikï¿½w na pierwszy argument
+		;inicjalizowanie rejestrï¿½w
 		mov dl, $buffer[1] ;size of input buffer
 		mov dh, 0 ;counter of loop iteration
 		mov bx, 2;set index of start buffer string
@@ -78,7 +80,7 @@ code1 segment
 			;jesli napotkano spacje
 			cmp ch, 32 ;32 - asci code of space
 			je detect_arg1
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentï¿½w
 			cmp dl, dh
 			je throw_exception
 			
@@ -94,7 +96,7 @@ code1 segment
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
+		;szukanie wskaznikï¿½w na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		mov byte ptr $arg2_start, dh
@@ -103,7 +105,7 @@ code1 segment
 			;jesli napotkano spacje
 			cmp ch, 32
 			je detect_arg2
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentï¿½w
 			cmp dl, dh
 			je throw_exception
 			
@@ -118,13 +120,13 @@ code1 segment
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
+		;szukanie wskaznikï¿½w na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		mov byte ptr $arg3_start, dh
 		find_arg3:
 			mov ch, $buffer[bx]
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentï¿½w
 			cmp dl, dh
 			je detect_arg3
 			
@@ -139,7 +141,7 @@ code1 segment
 			inc dh
 		
 		;----------------------------------------------------------
-		;rozpoznawanie wartosci wszystkich 3 argumentów
+		;rozpoznawanie wartosci wszystkich 3 argumentï¿½w
 		;----------------------------------------------------------
 		
 		;create switch for arg1 (number)
@@ -245,8 +247,8 @@ code1 segment
 			jmp end_program
 			
 		operation_substract:
-			mov al, byte ptr $arg3_value
-			sub al, byte ptr $arg1_value
+			mov al, byte ptr $arg1_value
+			sub al, byte ptr $arg3_value
 			mov byte ptr $result, al
 			call print_result
 			jmp end_program
@@ -593,6 +595,20 @@ code1 segment
 			je print_1
 			
 		end_recognise_x1:
+
+		check_tail:
+			;counting modulo
+			mov dx, 0   
+			mov ax, 0
+			mov al, byte ptr $result
+			mov bx, 10
+			div bx 
+			;in dx is ax moulo 10, w ax znajduje siÄ™ int ax/10, 15/10 = 1, ax = 1
+
+			cmp al, 1
+			je print_tail			
+
+		end_check_tail:
 		
 		;mov dx, seg $result
 		;mov ds, dx ; segment do ds
@@ -764,6 +780,15 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_program
+
+	print_tail:
+		mov dx, seg $tail
+		mov ds, dx ; segment do ds
+		mov dx, offset $tail    
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_check_tail
 		
 	;-----------------------------------------------------	
 	;debug function
