@@ -491,8 +491,6 @@ code1 segment
 			inc dx                                  
 			mov ah, 9 ; wypisz stringa pod adresem ds:dx
 			int 21h
-			call print_separator
-			jmp recognise_number_x1
 			
 		continue:
 		
@@ -652,49 +650,73 @@ code1 segment
 		mov dx, seg $ten
 		mov ds, dx ; segment do ds
 		mov dx, offset $ten  
-		jmp print_and_jmp_end_recognise_x1
+		inc dx                                     
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_11:
 		mov dx, seg $eleven
 		mov ds, dx ; segment do ds
-		mov dx, offset $eleven   
-		jmp print_and_jmp_end_recognise_x1
+		mov dx, offset $eleven    
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_12:
 		mov dx, seg $twelve
 		mov ds, dx ; segment do ds
 		mov dx, offset $twelve  
-		jmp print_and_jmp_end_recognise_x1
+		inc dx                                         
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_13:
 		mov dx, seg $thirteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $thirteen  
-		jmp print_and_jmp_end_recognise_x1
+		mov dx, offset $thirteen    
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_14:
 		mov dx, seg $fourteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $fourteen  
-		jmp print_and_jmp_end_recognise_x1
+		mov dx, offset $fourteen   
+		inc dx                                        
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_15:
 		mov dx, seg $fiveteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $fiveteen   
-		jmp print_and_jmp_end_recognise_x1
+		mov dx, offset $fiveteen    
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_16:
 		mov dx, seg $sixteen
 		mov ds, dx ; segment do ds
-		mov dx, offset $sixteen  
-		jmp print_and_jmp_end_recognise_x1
+		mov dx, offset $sixteen      
+		inc dx                                     
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_17:
 		mov dx, seg $seventeen
 		mov ds, dx ; segment do ds
 		mov dx, offset $seventeen   
-		jmp print_and_jmp_end_recognise_x1
+		inc dx                                        
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 
 	print_18:
 		mov dx, seg $eighteen
@@ -717,98 +739,146 @@ code1 segment
 	print_20:
 		mov dx, seg $twent
 		mov ds, dx ; segment do ds
-		mov dx, offset $twent    
-		jmp print_and_jmp_end_recognise_number_x10
+		mov dx, offset $twent       
+		inc dx                                    
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_30:
 		mov dx, seg $thirty
 		mov ds, dx ; segment do ds
 		mov dx, offset $thirty    
-		jmp print_and_jmp_end_recognise_number_x10
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_40:
 		mov dx, seg $forty
 		mov ds, dx ; segment do ds
-		mov dx, offset $forty       
-		jmp print_and_jmp_end_recognise_number_x10
+		mov dx, offset $forty        
+		inc dx                                   
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_50:
 		mov dx, seg $fifty
 		mov ds, dx ; segment do ds
 		mov dx, offset $fifty    
-		jmp print_and_jmp_end_recognise_number_x10
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_60:
 		mov dx, seg $sixty
 		mov ds, dx ; segment do ds
 		mov dx, offset $sixty      
-		jmp print_and_jmp_end_recognise_number_x10
+		inc dx                                     
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_70:
 		mov dx, seg $seventy
 		mov ds, dx ; segment do ds
-		mov dx, offset $seventy  
-		jmp print_and_jmp_end_recognise_number_x10
+		mov dx, offset $seventy    
+		inc dx                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_80:
 		mov dx, seg $eighty
 		mov ds, dx ; segment do ds
-		mov dx, offset $eighty    
-		jmp print_and_jmp_end_recognise_number_x10
+		mov dx, offset $eighty      
+		inc dx                                     
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_number_x10
 		
 	print_1:
 		mov dx, seg $one
 		mov ds, dx ; segment do ds
 		mov dx, offset $one  
-		jmp print_and_jmp_end_recognise_x1
+		inc dx
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_2:
 		mov dx, seg $two
 		mov ds, dx ; segment do ds
 		mov dx, offset $two 
-		jmp print_and_jmp_end_recognise_x1
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_3:
 		mov dx, seg $three
 		mov ds, dx ; segment do ds
 		mov dx, offset $three  
-		jmp print_and_jmp_end_recognise_x1
+		inc dx
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_4:
 		mov dx, seg $four
 		mov ds, dx ; segment do ds
 		mov dx, offset $four   
-		jmp print_and_jmp_end_recognise_x1
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_5:
 		mov dx, seg $five
 		mov ds, dx ; segment do ds
 		mov dx, offset $five    
-		jmp print_and_jmp_end_recognise_x1
+		inc dx
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_6:
 		mov dx, seg $six
 		mov ds, dx ; segment do ds
 		mov dx, offset $six     
-		jmp print_and_jmp_end_recognise_x1
+		inc dx
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_7:
 		mov dx, seg $seven
 		mov ds, dx ; segment do ds
 		mov dx, offset $seven    
-		jmp print_and_jmp_end_recognise_x1
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_8:
 		mov dx, seg $eight
 		mov ds, dx ; segment do ds
 		mov dx, offset $eight   
-		jmp print_and_jmp_end_recognise_x1
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_9:
 		mov dx, seg $nine
 		mov ds, dx ; segment do ds
 		mov dx, offset $nine    
-		jmp print_and_jmp_end_recognise_x1
+		inc dx	
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		jmp end_recognise_x1
 		
 	print_0:
 		mov dx, seg $zero
@@ -818,6 +888,17 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		jmp end_program
+		
+	;-----------------------------------------------------	
+	;debug function
+		
+	print_debug:
+		mov dx, seg $debug
+		mov ds, dx ; segment do ds
+		mov dx, offset $debug                                       
+		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+		int 21h
+		ret
 
 	print_separator:
 		mov dx, seg $separator
@@ -826,18 +907,12 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		ret
-		
-	print_and_jmp_end_recognise_number_x10:
-		call interrapt_print
-		jmp end_recognise_number_x10
-		
-	print_and_jmp_end_recognise_x1:
-		call interrapt_print
-		jmp end_recognise_x1
-		
-	interrapt_print:
-		inc dx	
-		mov ah, 9 ; wypisz stringa pod adresem ds:dx
+	
+	;arg:
+	;mov dl, $var 
+	print_char:
+		add dl, 30h                                    
+		mov ah, 02h ; wypisz stringa pod adresem ds:dx
 		int 21h
 		ret
 		
