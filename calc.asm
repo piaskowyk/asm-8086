@@ -80,12 +80,34 @@ code1 segment
 		;wyznaczanie pointerów na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
+		;iteruj wskaźnikiem $argX_start aż do momentu jak napotka znak inny niż spacja, i będzie śmigać
+		
 		;----------------------------------------------------------
 		;szukanie wskazników na pierwszy argument
 		;inicjalizowanie rejestrów
 		mov dl, $buffer[1] ;size of input buffer
 		mov dh, 0 ;counter of loop iteration
 		mov bx, 2;set index of start buffer string
+		
+		trim_space1:
+			mov ch, $buffer[bx]
+			cmp ch, 9
+			je continue1
+			cmp ch, 32
+			jne before_find_arg1
+			
+			continue1:
+			
+			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			je throw_exception
+			
+			inc bx ;move both pointer to next char of string
+			inc dh ;increment loop index
+		jmp trim_space1
+		
+		before_find_arg1:
+			mov byte ptr $arg1_start, dh
+		
 		find_arg1:
 			mov ch, $buffer[bx]; loat char from buffer on index bx to ch	
 			;jesli napotkano spacje
@@ -101,7 +123,7 @@ code1 segment
 	
 		;show information about error and end program
 		detect_arg1:
-			mov byte ptr $arg1_start, 0
+			;mov byte ptr $arg1_start, 0
 			dec dh ;because dh pointer on space
 			mov byte ptr $arg1_end, dh
 			inc dh
@@ -110,7 +132,26 @@ code1 segment
 		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
-		mov byte ptr $arg2_start, dh
+		
+		trim_space2:
+			mov ch, $buffer[bx]
+			cmp ch, 9
+			je continue2
+			cmp ch, 32
+			jne before_find_arg2
+			
+			continue2:
+			
+			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			je throw_exception
+			
+			inc bx ;move both pointer to next char of string
+			inc dh ;increment loop index
+		jmp trim_space2
+		
+		before_find_arg2:
+			mov byte ptr $arg2_start, dh
+		
 		find_arg2:
 			mov ch, $buffer[bx]
 			;jesli napotkano spacje
@@ -134,11 +175,36 @@ code1 segment
 		;szukanie wskazników na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
-		mov byte ptr $arg3_start, dh
+		
+		trim_space3:
+			mov ch, $buffer[bx]
+			cmp ch, 9
+			je continue3
+			cmp ch, 32
+			jne before_find_arg3
+			
+			continue3:
+			
+			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			je throw_exception
+			
+			inc bx ;move both pointer to next char of string
+			inc dh ;increment loop index
+		jmp trim_space3
+		
+		before_find_arg3:
+			mov byte ptr $arg3_start, dh
+		
 		find_arg3:
 			mov ch, $buffer[bx]
 			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
+			je detect_arg3
+			
+			cmp ch, 32
+			je detect_arg3
+			
+			cmp ch, 9
 			je detect_arg3
 			
 			inc bx ;move both pointer to next char of string
@@ -308,6 +374,7 @@ code1 segment
 	compare_for_arg1_fn:
 		;compare arg1 to $one
 		mov bx, 2; $buffer[2] iterate over each char in buffer
+		add bl, byte ptr $arg1_start
 		mov si, 1; $one[1]
 		mov dh, byte ptr $arg1_start
 		mov dl, byte ptr $arg1_end
