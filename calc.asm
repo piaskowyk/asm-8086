@@ -1,5 +1,3 @@
-;TODO: dorobić obsługę wielu spacjii
-;TODO: optymalizacja, żeby skrócić kod
 data1 segment
 	;program variabile
 	;lenght, name, end char, decimal value
@@ -44,8 +42,8 @@ data1 segment
 	$debug 		db 10, 13, "mleko", 10, 13, "$"
 	
 	;bufor for user input
-	$buffer 	db 26 ;maksymalna dozwolona liczba znaków
-				db ? ;liczba podanych znaków
+	$buffer 	db 26 ;maksymalna dozwolona liczba znak?w
+				db ? ;liczba podanych znak?w
 				db 26 dup(0) ;znaki podane przez uzytkownika
 	
 	$arg1_start 	db 0
@@ -67,7 +65,8 @@ data1 segment
 data1 ends
 
 code1 segment
-	run_program:
+	run_program:    
+	    call set_ds
 		;print start message
 		call print_intro
 
@@ -77,20 +76,21 @@ code1 segment
 		int 21h
 		
 		;----------------------------------------------------------
-		;wyznaczanie pointerów na wszystkie 3 argumenty
+		;wyznaczanie pointer?w na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
-		;iteruj wskaźnikiem $argX_start aż do momentu jak napotka znak inny niż spacja, i będzie śmigać
+		;iteruj wska?nikiem $argX_start a? do momentu jak napotka znak inny ni? spacja, i b?dzie ?miga?
 		
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
-		;inicjalizowanie rejestrów
-		mov dl, $buffer[1] ;size of input buffer
+		;szukanie wskaznik?w na pierwszy argument
+		;inicjalizowanie rejestr?w 
+		call set_ds
+		mov dl, byte ptr ds:[$buffer + 1] ;size of input buffer
 		mov dh, 0 ;counter of loop iteration
 		mov bx, 2;set index of start buffer string
 		
 		trim_space1:
-			mov ch, $buffer[bx]
+			mov ch, byte ptr ds:[$buffer + bx]
 			cmp ch, 9
 			je continue1
 			cmp ch, 32
@@ -98,7 +98,7 @@ code1 segment
 			
 			continue1:
 			
-			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
 			je throw_exception
 			
 			inc bx ;move both pointer to next char of string
@@ -106,14 +106,14 @@ code1 segment
 		jmp trim_space1
 		
 		before_find_arg1:
-			mov byte ptr $arg1_start, dh
+			mov byte ptr ds:[$arg1_start], dh
 		
 		find_arg1:
-			mov ch, $buffer[bx]; loat char from buffer on index bx to ch	
+			mov ch, byte ptr ds:[$buffer + bx]; loat char from buffer on index bx to ch	
 			;jesli napotkano spacje
 			cmp ch, 32 ;32 - asci code of space
 			je detect_arg1
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
 			cmp dl, dh
 			je throw_exception
 			
@@ -125,16 +125,16 @@ code1 segment
 		detect_arg1:
 			;mov byte ptr $arg1_start, 0
 			dec dh ;because dh pointer on space
-			mov byte ptr $arg1_end, dh
+			mov byte ptr ds:[$arg1_end], dh
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
+		;szukanie wskaznik?w na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		
 		trim_space2:
-			mov ch, $buffer[bx]
+			mov ch, byte ptr ds:[$buffer + bx]
 			cmp ch, 9
 			je continue2
 			cmp ch, 32
@@ -142,7 +142,7 @@ code1 segment
 			
 			continue2:
 			
-			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
 			je throw_exception
 			
 			inc bx ;move both pointer to next char of string
@@ -150,14 +150,14 @@ code1 segment
 		jmp trim_space2
 		
 		before_find_arg2:
-			mov byte ptr $arg2_start, dh
+			mov byte ptr ds:[$arg2_start], dh
 		
 		find_arg2:
-			mov ch, $buffer[bx]
+			mov ch, byte ptr ds:[$buffer + bx]
 			;jesli napotkano spacje
 			cmp ch, 32
 			je detect_arg2
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
 			cmp dl, dh
 			je throw_exception
 			
@@ -168,16 +168,16 @@ code1 segment
 		;show information about error and end program
 		detect_arg2:
 			dec dh ;because dh pointer on space
-			mov byte ptr $arg2_end, dh
+			mov byte ptr ds:[$arg2_end], dh
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskazników na pierwszy argument
+		;szukanie wskaznik?w na pierwszy argument
 		inc bx ; move to first char behind space
 		inc dh ;increment loop index
 		
 		trim_space3:
-			mov ch, $buffer[bx]
+			mov ch, byte ptr ds:[$buffer + bx]
 			cmp ch, 9
 			je continue3
 			cmp ch, 32
@@ -185,7 +185,7 @@ code1 segment
 			
 			continue3:
 			
-			cmp dl, dh ;jeśli dotarł do końca znaczy że wystąpił wyjątek
+			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
 			je throw_exception
 			
 			inc bx ;move both pointer to next char of string
@@ -193,11 +193,11 @@ code1 segment
 		jmp trim_space3
 		
 		before_find_arg3:
-			mov byte ptr $arg3_start, dh
+			mov byte ptr ds:[$arg3_start], dh
 		
 		find_arg3:
-			mov ch, $buffer[bx]
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
+			mov ch, byte ptr ds:[$buffer + bx]
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
 			cmp dl, dh
 			je detect_arg3
 			
@@ -214,11 +214,11 @@ code1 segment
 		;show information about error and end program
 		detect_arg3:
 			dec dh ;because dh pointer on space
-			mov byte ptr $arg3_end, dh
+			mov byte ptr ds:[$arg3_end], dh
 			inc dh
 		
 		;----------------------------------------------------------
-		;rozpoznawanie wartosci wszystkich 3 argumentów
+		;rozpoznawanie wartosci wszystkich 3 argument?w
 		;----------------------------------------------------------
 		
 		;create switch for arg1 (number)
@@ -306,8 +306,9 @@ code1 segment
 		;----------------------------------------------------------
 		;do arythmetic operation
 		;----------------------------------------------------------
-		
-		mov ah, $arg2_value
+		  
+		call set_ds 
+		mov ah, byte ptr ds:[$arg2_value]
 		
 		cmp ah, 1
 		je operation_add
@@ -317,24 +318,24 @@ code1 segment
 		je operation_multiply
 		
 		operation_add:
-			mov al, byte ptr $arg1_value
-			add al, byte ptr $arg3_value
-			mov byte ptr $result, al
+			mov al, byte ptr ds:[$arg1_value]
+			add al, byte ptr ds:[$arg3_value]
+			mov byte ptr ds:[$result], al
 			call print_result
 			jmp end_program
 			
 		operation_substract:
-			mov al, byte ptr $arg1_value
-			sub al, byte ptr $arg3_value
-			mov byte ptr $result, al
+			mov al, byte ptr ds:[$arg1_value]
+			sub al, byte ptr ds:[$arg3_value]
+			mov byte ptr ds:[$result], al
 			call print_result
 			jmp end_program
 			
 		operation_multiply:
-			mov al, byte ptr $arg1_value
-			mov bl, byte ptr $arg3_value
+			mov al, byte ptr ds:[$arg1_value]
+			mov bl, byte ptr ds:[$arg3_value]
 			mul bl
-			mov byte ptr $result, al
+			mov byte ptr ds:[$result], al
 			call print_result
 			jmp end_program
 		
@@ -372,12 +373,13 @@ code1 segment
 	;arg
 	;mov di, offset $<variabile name>
 	compare_for_arg1_fn:
+	    call set_ds
 		;compare arg1 to $one
 		mov bx, 2; $buffer[2] iterate over each char in buffer
-		add bl, byte ptr $arg1_start
+		add bl, byte ptr ds:[$arg1_start]
 		mov si, 1; $one[1]
-		mov dh, byte ptr $arg1_start
-		mov dl, byte ptr $arg1_end
+		mov dh, byte ptr ds:[$arg1_start]
+		mov dl, byte ptr ds:[$arg1_end]
 		
 		;calculate lenght of arg1
 		mov ch, dl
@@ -387,14 +389,14 @@ code1 segment
 		
 		;sprawdz czy dlugosci sa takie same
 		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
-		cmp ah, [di]
+		cmp ah, ds:[di]
 		jne end_compare1
 		
 		inc di;go to first char of string
 		;if have the same lenght
 		compare_to1:
-			mov ch, $buffer[bx] 
-			mov cl, [di]
+			mov ch, byte ptr ds:[$buffer + bx] 
+			mov cl, ds:[di]
 			
 			cmp ch, cl
 			jne end_compare1
@@ -411,8 +413,8 @@ code1 segment
 			;move to posithion with deceminal value
 			inc di
 			inc di
-			mov al, [di]
-			mov byte ptr $arg1_value, al
+			mov al, ds:[di]
+			mov byte ptr ds:[$arg1_value], al
 			;end switch
 			jmp end_switch1
 			
@@ -423,14 +425,15 @@ code1 segment
 	;arg
 	;mov di, offset $<variabile name>
 	compare_for_arg2_fn:
+	    call set_ds
 		;compare arg1 to $one
-		mov al, byte ptr $arg2_start
+		mov al, byte ptr ds:[$arg2_start]
 		mov bx, ax
 		mov bh, 0; potrzeba tylko czesci bl, a rejestr zostanie zapisany do 2 bitowego
 		add bx, 2; 1 and 2 byte is reserved ,$buffer[2] iterate over each char in buffer
 		mov si, 1; $one[1]
-		mov dh, byte ptr $arg2_start
-		mov dl, byte ptr $arg2_end
+		mov dh, byte ptr ds:[$arg2_start]
+		mov dl, byte ptr ds:[$arg2_end]
 		
 		;calculate lenght of arg1
 		mov ch, dl
@@ -440,14 +443,14 @@ code1 segment
 		
 		;sprawdz czy dlugosci sa takie same
 		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
-		cmp ah, [di]
+		cmp ah, ds:[di]
 		jne end_compare2
 		
 		inc di;go to first char of string
 		;if have the same lenght
 		compare_to2:
-			mov ch, $buffer[bx] 
-			mov cl, [di]
+			mov ch, byte ptr ds:[$buffer + bx] 
+			mov cl, ds:[di]
 			
 			cmp ch, cl
 			jne end_compare2
@@ -464,8 +467,8 @@ code1 segment
 			;move to posithion with deceminal value
 			inc di
 			inc di
-			mov al, [di]
-			mov byte ptr $arg2_value, al
+			mov al, ds:[di]
+			mov byte ptr ds:[$arg2_value], al
 			;end switch
 			jmp end_switch2
 			
@@ -475,15 +478,16 @@ code1 segment
 	;-----------------------------------------------------	
 	;arg
 	;mov di, offset $<variabile name>
-	compare_for_arg3_fn:
+	compare_for_arg3_fn: 
+	    call set_ds
 		;compare arg1 to $one
-		mov al, byte ptr $arg3_start
+		mov al, byte ptr ds:[$arg3_start]
 		mov bx, ax; $buffer[2] iterate over each char in buffer
 		mov bh, 0; potrzeba tylko czesci bl, a rejestr zostanie zapisany do 2 bitowego
 		add bx, 2; 1 and 2 byte is reserved ,$buffer[2] iterate over each char in buffer
 		mov si, 1; $one[1]
-		mov dh, byte ptr $arg3_start
-		mov dl, byte ptr $arg3_end
+		mov dh, byte ptr ds:[$arg3_start]
+		mov dl, byte ptr ds:[$arg3_end]
 		
 		;calculate lenght of arg1
 		mov ch, dl
@@ -493,14 +497,14 @@ code1 segment
 		
 		;sprawdz czy dlugosci sa takie same
 		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
-		cmp ah, [di]
+		cmp ah, ds:[di]
 		jne end_compare3
 		
 		inc di;go to first char of string
 		;if have the same lenght
 		compare_to3:
-			mov ch, $buffer[bx] 
-			mov cl, [di]
+			mov ch, byte ptr ds:[$buffer + bx] 
+			mov cl, ds:[di]
 			
 			cmp ch, cl
 			jne end_compare3
@@ -517,8 +521,8 @@ code1 segment
 			;move to posithion with deceminal value
 			inc di
 			inc di
-			mov al, [di]
-			mov byte ptr $arg3_value, al
+			mov al, ds:[di]
+			mov byte ptr ds:[$arg3_value], al
 			;end switch
 			jmp end_switch3
 			
@@ -532,11 +536,11 @@ code1 segment
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
 		
-		;TODO
+		call set_ds
 		;wypisac liczbe dziesietna slownie
 		mov ax, 0
-		mov al, byte ptr $result
-		mov dl, byte ptr $result; copy result
+		mov al, byte ptr ds:[$result]
+		mov dl, byte ptr ds:[$result]; copy result
 		
 		;if zero end program
 		cmp al, 0
@@ -550,7 +554,7 @@ code1 segment
 			mov bx, 65535d
 			sub bx, ax
 			inc bl
-			mov byte ptr $result, bl
+			mov byte ptr ds:[$result], bl
 			;print 'minus'
 			mov dx, seg $minus
 			mov ds, dx ; segment do ds
@@ -664,11 +668,12 @@ code1 segment
 
 			cmp dl, 19d ;if 19
 			je print_19
-
+            
+            call set_ds
 			;counting modulo
 			mov dx, 0   
 			mov ax, 0
-			mov al, byte ptr $result
+			mov al, byte ptr ds:[$result]
 			mov bx, 10
 			div bx 
 			;in dx is ax moulo 10
@@ -768,18 +773,14 @@ code1 segment
 		mov ds, dx ; segment do ds
 		mov dx, offset $eighteen     
 		inc dx                                      
-		mov ah, 9 ; wypisz stringa pod adresem ds:dx
-		int 21h
-		jmp end_recognise_x1
+		jmp print_and_jmp_end_recognise_x1
 
 	print_19:
 		mov dx, seg $nineteen
 		mov ds, dx ; segment do ds
 		mov dx, offset $nineteen   
 		inc dx                                        
-		mov ah, 9 ; wypisz stringa pod adresem ds:dx
-		int 21h
-		jmp end_recognise_x1
+		jmp print_and_jmp_end_recognise_x1
 		
 	print_20:
 		mov dx, seg $twent
@@ -906,7 +907,12 @@ code1 segment
 		inc dx	
 		mov ah, 9 ; wypisz stringa pod adresem ds:dx
 		int 21h
-		ret
+		ret    
+		
+	set_ds:
+	    mov ax, seg $one
+	    mov ds, ax  
+	    ret
 		
 code1 ends
 

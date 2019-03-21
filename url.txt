@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/43570102/how-to-print-bmp-photo-file-in-assembly-graphics-mode
+http://archive.gamedev.net/archive/reference/articles/article202.html
+https://www.google.com/search?ei=30OOXJqSG5SWjgb_nZeoDg&q=assembler+8086+show+bmp+image&oq=assembler+8086+show+bmp+image&gs_l=psy-ab.3...848974.853746..855619...0.0..0.67.568.9......0....1..gws-wiz.......35i304i39j35i39._0m8OAn42gk
