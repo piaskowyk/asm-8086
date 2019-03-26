@@ -1,6 +1,5 @@
 data1 segment
-	;program variabile
-	;lenght, name, end char, decimal value
+	;długość, wartość string, snak końca, wartość w systemie dziesiętnym
 	$zero 		db 4d, "zero", "$", 0d
 	$one 		db 5d, "jeden", "$", 1d
 	$two 		db 3d, "dwa", "$", 2d
@@ -41,10 +40,10 @@ data1 segment
 	
 	$debug 		db 10, 13, "mleko", 10, 13, "$"
 	
-	;bufor for user input
-	$buffer 	db 26 ;maksymalna dozwolona liczba znak?w
-				db ? ;liczba podanych znak?w
-				db 26 dup(0) ;znaki podane przez uzytkownika
+	;bufor na wartosci wprowadzone przez użytkownika
+	$buffer 	db 100 ;maksymalna dozwolona liczba znaków
+				db ? ;liczba podanych znaków
+				db 100 dup(0) ;znaki podane przez uzytkownika
 	
 	$arg1_start 	db 0
 	$arg1_end 		db 0
@@ -65,73 +64,73 @@ data1 segment
 data1 ends
 
 code1 segment
-	run_program:    
+	run_program:   
+		;ustaw ds na segment danych
 	    call set_ds
-		;print start message
+		;wypisz wiadomośćstartową
 		call print_intro
 
-		;read user input to buffer
+		;wczytaj tekst wprowadzony przez użytkownika do bufora
 		mov dx, offset $buffer
 		mov ah, 0ah
 		int 21h
 		
 		;----------------------------------------------------------
-		;wyznaczanie pointer?w na wszystkie 3 argumenty
+		;wyznaczanie punktów startowych i końcowych na wszystkie 3 argumenty
 		;----------------------------------------------------------
 		
-		;iteruj wska?nikiem $argX_start a? do momentu jak napotka znak inny ni? spacja, i b?dzie ?miga?
+		;iteruj wskaźnikiem $argX_start aż do momentu jak napotka znak inny niż spacja
 		
 		;----------------------------------------------------------
-		;szukanie wskaznik?w na pierwszy argument
-		;inicjalizowanie rejestr?w 
+		;szukanie wskaznikźw na pierwszy argument
+		;inicjalizowanie rejestrów 
 		call set_ds
-		mov dl, byte ptr ds:[$buffer + 1] ;size of input buffer
-		mov dh, 0 ;counter of loop iteration
-		mov bx, 2;set index of start buffer string
+		mov dl, byte ptr ds:[$buffer + 1] ;rozmiar bufora wpisanego przez użytkownika
+		mov dh, 0 ;startowanie licznika do iteracji
+		mov bx, 2; ustawienie wskaźnika na początek napisu
 		
 		trim_space1:
+			;wczytuj znak po znaku i porównuj
 			mov ch, byte ptr ds:[$buffer + bx]
-			cmp ch, 9
+			cmp ch, 9 ; tabulacja
 			je continue1
-			cmp ch, 32
+			cmp ch, 32 ; spacja
 			jne before_find_arg1
 			
 			continue1:
 			
-			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
+			cmp dl, dh ;jeżli dotarł do końca znaczy że wystąpił wyjątek
 			je throw_exception
 			
-			inc bx ;move both pointer to next char of string
-			inc dh ;increment loop index
+			inc bx ;przesuń wskaźnik na następny znak
+			inc dh ;inkrementuj indeks pętli
 		jmp trim_space1
 		
 		before_find_arg1:
 			mov byte ptr ds:[$arg1_start], dh
 		
 		find_arg1:
-			mov ch, byte ptr ds:[$buffer + bx]; loat char from buffer on index bx to ch	
+			mov ch, byte ptr ds:[$buffer + bx]; załaduj pierwszy znak z bufora o indekxie bx do ch
 			;jesli napotkano spacje
-			cmp ch, 32 ;32 - asci code of space
+			cmp ch, 32 ;32 - asci kod spacji
 			je detect_arg1
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je throw_exception
 			
-			inc bx ;move both pointer to next char of string
-			inc dh ;increment loop index
+			inc bx ;przesuń wskaźnik na następny znak
+			inc dh ;inkrementuj indeks pętli
 		jmp find_arg1
-	
-		;show information about error and end program
+
 		detect_arg1:
-			;mov byte ptr $arg1_start, 0
-			dec dh ;because dh pointer on space
+			dec dh ;ponieważ dh wskazywało na spacje
 			mov byte ptr ds:[$arg1_end], dh
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskaznik?w na pierwszy argument
-		inc bx ; move to first char behind space
-		inc dh ;increment loop index
+		;szukanie wskazników na pierwszy argument
+		inc bx ; przesuń na pierwszy znak za spacje
+		inc dh ;inkrementuj indeks pętli
 		
 		trim_space2:
 			mov ch, byte ptr ds:[$buffer + bx]
@@ -142,11 +141,11 @@ code1 segment
 			
 			continue2:
 			
-			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
+			cmp dl, dh ;jeżli dotarł do końca znaczy że wystąpił wyjątek
 			je throw_exception
 			
-			inc bx ;move both pointer to next char of string
-			inc dh ;increment loop index
+			inc bx ;przesuń wskaźnik na następny znak
+			inc dh ;inkrementuj indeks pętli
 		jmp trim_space2
 		
 		before_find_arg2:
@@ -157,24 +156,23 @@ code1 segment
 			;jesli napotkano spacje
 			cmp ch, 32
 			je detect_arg2
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je throw_exception
 			
-			inc bx ;move both pointer to next char of string
-			inc dh ;increment loop index
+			inc bx ;przesuń wskaźnik na następny znak
+			inc dh ;inkrementuj indeks pętli
 		jmp find_arg2
 	
-		;show information about error and end program
 		detect_arg2:
-			dec dh ;because dh pointer on space
+			dec dh ;ponieważ dh wskazywało na spacje
 			mov byte ptr ds:[$arg2_end], dh
 			inc dh
 			
 		;----------------------------------------------------------
-		;szukanie wskaznik?w na pierwszy argument
-		inc bx ; move to first char behind space
-		inc dh ;increment loop index
+		;szukanie wskazników na pierwszy argument
+		inc bx ; przesuń na pierwszy znak za spacje
+		inc dh ; inkrementuj indeks pętli
 		
 		trim_space3:
 			mov ch, byte ptr ds:[$buffer + bx]
@@ -185,7 +183,7 @@ code1 segment
 			
 			continue3:
 			
-			cmp dl, dh ;je?li dotar? do ko?ca znaczy ?e wyst?pi? wyj?tek
+			cmp dl, dh ;jeżli dotarł do końca znaczy że wystżpił wyjątek
 			je throw_exception
 			
 			inc bx ;move both pointer to next char of string
@@ -197,7 +195,7 @@ code1 segment
 		
 		find_arg3:
 			mov ch, byte ptr ds:[$buffer + bx]
-			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argument?w
+			;jesli dotarl do konca stringa to znaczy ze nie podano wszystkich argumentów
 			cmp dl, dh
 			je detect_arg3
 			
@@ -207,21 +205,20 @@ code1 segment
 			cmp ch, 9
 			je detect_arg3
 			
-			inc bx ;move both pointer to next char of string
-			inc dh ;increment loop index
+			inc bx ;przesuń wskaźnik na następny znak
+			inc dh ;inkrementuj indeks pętli
 		jmp find_arg3
 	
-		;show information about error and end program
 		detect_arg3:
-			dec dh ;because dh pointer on space
+			dec dh ;ponieważ dh wskazywało na spacje
 			mov byte ptr ds:[$arg3_end], dh
 			inc dh
 		
 		;----------------------------------------------------------
-		;rozpoznawanie wartosci wszystkich 3 argument?w
+		;rozpoznawanie wartosci wszystkich 3 argumentów
 		;----------------------------------------------------------
 		
-		;create switch for arg1 (number)
+		;rozpoznawanie pierwszej cyfry
 		mov di, offset $zero
 		call compare_for_arg1_fn
 		
@@ -255,7 +252,7 @@ code1 segment
 		call throw_exception
 		end_switch1:
 		
-		;recognise erythmetic opertion
+		;rozpoznawanie operacji arytmetycznej
 		mov di, offset $plus
 		call compare_for_arg2_fn
 		
@@ -268,8 +265,7 @@ code1 segment
 		call throw_exception
 		end_switch2:
 		
-		;recognise arg3 (number)
-		
+		;rozpoznawanie drugiej cyfry
 		mov di, offset $zero
 		call compare_for_arg3_fn
 		
@@ -304,7 +300,7 @@ code1 segment
 		end_switch3:
 		
 		;----------------------------------------------------------
-		;do arythmetic operation
+		;przeprwadz operację arytmetyczną
 		;----------------------------------------------------------
 		  
 		call set_ds 
@@ -317,21 +313,21 @@ code1 segment
 		cmp ah, 3
 		je operation_multiply
 		
-		operation_add:
+		operation_add:;dodawanie
 			mov al, byte ptr ds:[$arg1_value]
 			add al, byte ptr ds:[$arg3_value]
 			mov byte ptr ds:[$result], al
 			call print_result
 			jmp end_program
 			
-		operation_substract:
+		operation_substract:;odejmowanie
 			mov al, byte ptr ds:[$arg1_value]
 			sub al, byte ptr ds:[$arg3_value]
 			mov byte ptr ds:[$result], al
 			call print_result
 			jmp end_program
 			
-		operation_multiply:
+		operation_multiply:;mnożenie
 			mov al, byte ptr ds:[$arg1_value]
 			mov bl, byte ptr ds:[$arg3_value]
 			mul bl
@@ -374,26 +370,26 @@ code1 segment
 	;mov di, offset $<variabile name>
 	compare_for_arg1_fn:
 	    call set_ds
-		;compare arg1 to $one
-		mov bx, 2; $buffer[2] iterate over each char in buffer
+		;porównywanie pierwszego argumentu
+		mov bx, 2; $buffer[2]
+		mov bh, 0
 		add bl, byte ptr ds:[$arg1_start]
-		mov si, 1; $one[1]
+		mov si, 1; $<variabile name>[1]
 		mov dh, byte ptr ds:[$arg1_start]
 		mov dl, byte ptr ds:[$arg1_end]
 		
-		;calculate lenght of arg1
+		;ubliczanie długości pierwszego arguentu
 		mov ch, dl
 		sub ch, dh
-		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
-		mov ah, ch ;ah contains lenght of arg1
+		add ch, 1 ;ponieraż na pierwszym bicie znajduje się długość
+		mov ah, ch ;ah zawiera długość pierwszej cyfry
 		
 		;sprawdz czy dlugosci sa takie same
-		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
 		cmp ah, ds:[di]
 		jne end_compare1
 		
-		inc di;go to first char of string
-		;if have the same lenght
+		inc di;przejdź do pierwszego znaku
+		;jeśli długości sa takie same
 		compare_to1:
 			mov ch, byte ptr ds:[$buffer + bx] 
 			mov cl, ds:[di]
@@ -404,13 +400,13 @@ code1 segment
 			cmp dh, dl
 			je is_detect1
 			
-			inc bx ;increment index char of buffer
-			inc di ; increment index char of program string 
-			inc dh ;increment loop index
+			inc bx ;inkrementuj index na znak bufora
+			inc di ;inkrementuj index na znak porównywanej zmiennej
+			inc dh ;inkrementuj index pętli
 		jmp compare_to1
 		
 		is_detect1:
-			;move to posithion with deceminal value
+			;zapisz rozpoznaną wartośćdziesiętną, ostanią wartością jest wartosć dziesiętna cyfry
 			inc di
 			inc di
 			mov al, ds:[di]
@@ -426,28 +422,27 @@ code1 segment
 	;mov di, offset $<variabile name>
 	compare_for_arg2_fn:
 	    call set_ds
-		;compare arg1 to $one
+		;porównywanie drugiego argumentu
 		mov al, byte ptr ds:[$arg2_start]
 		mov bx, ax
 		mov bh, 0; potrzeba tylko czesci bl, a rejestr zostanie zapisany do 2 bitowego
-		add bx, 2; 1 and 2 byte is reserved ,$buffer[2] iterate over each char in buffer
-		mov si, 1; $one[1]
+		add bx, 2; $buffer[2]
+		mov si, 1; $<variabile name>[1]
 		mov dh, byte ptr ds:[$arg2_start]
 		mov dl, byte ptr ds:[$arg2_end]
 		
-		;calculate lenght of arg1
+		;oblicz długość
 		mov ch, dl
 		sub ch, dh
-		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
-		mov ah, ch ;ah contains lenght of arg1
+		add ch, 1 ;ponieważ indeks zaczyna się od 0
+		mov ah, ch
 		
 		;sprawdz czy dlugosci sa takie same
-		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
 		cmp ah, ds:[di]
 		jne end_compare2
 		
-		inc di;go to first char of string
-		;if have the same lenght
+		inc di;idź do pierwszego indeksu
+		;jeśli mają te same długości
 		compare_to2:
 			mov ch, byte ptr ds:[$buffer + bx] 
 			mov cl, ds:[di]
@@ -458,13 +453,13 @@ code1 segment
 			cmp dh, dl
 			je is_detect2
 			
-			inc bx ;increment index char of buffer
-			inc di ; increment index char of program string 
-			inc dh ;increment loop index
+			inc bx ;inkrementuj index na znak bufora
+			inc di ;inkrementuj index na znak porównywanej zmiennej
+			inc dh ;inkrementuj index pętli
 		jmp compare_to2
 		
 		is_detect2:
-			;move to posithion with deceminal value
+			;zapisz rozpoznaną wartośćdziesiętną, ostanią wartością jest wartosć dziesiętna cyfry
 			inc di
 			inc di
 			mov al, ds:[di]
@@ -480,28 +475,26 @@ code1 segment
 	;mov di, offset $<variabile name>
 	compare_for_arg3_fn: 
 	    call set_ds
-		;compare arg1 to $one
 		mov al, byte ptr ds:[$arg3_start]
 		mov bx, ax; $buffer[2] iterate over each char in buffer
-		mov bh, 0; potrzeba tylko czesci bl, a rejestr zostanie zapisany do 2 bitowego
-		add bx, 2; 1 and 2 byte is reserved ,$buffer[2] iterate over each char in buffer
-		mov si, 1; $one[1]
+		mov bh, 0
+		add bx, 2
+		mov si, 1; $<variabile name>[1]
 		mov dh, byte ptr ds:[$arg3_start]
 		mov dl, byte ptr ds:[$arg3_end]
 		
-		;calculate lenght of arg1
+		;oblicz długość
 		mov ch, dl
 		sub ch, dh
-		add ch, 1 ;because start index is 0, so lenght of first argument is shorten by one
-		mov ah, ch ;ah contains lenght of arg1
+		add ch, 1
+		mov ah, ch
 		
 		;sprawdz czy dlugosci sa takie same
-		;di is set as argument before call function, pointing on first byte, whose giveing information about lenght string
 		cmp ah, ds:[di]
 		jne end_compare3
 		
-		inc di;go to first char of string
-		;if have the same lenght
+		inc di;idź do pierwszego znaku
+		;jeśli są tej samej długości
 		compare_to3:
 			mov ch, byte ptr ds:[$buffer + bx] 
 			mov cl, ds:[di]
@@ -512,13 +505,12 @@ code1 segment
 			cmp dh, dl
 			je is_detect3
 			
-			inc bx ;increment index char of buffer
-			inc di ; increment index char of program string 
-			inc dh ;increment loop index
+			inc bx ;inkrementuj index na znak bufora
+			inc di ;inkrementuj index na znak porównywanej zmiennej
+			inc dh ;inkrementuj index pętli
 		jmp compare_to3
 		
 		is_detect3:
-			;move to posithion with deceminal value
 			inc di
 			inc di
 			mov al, ds:[di]
