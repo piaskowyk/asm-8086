@@ -1,3 +1,5 @@
+assume cs:code1
+
 data1 segment
 	;długość, wartość string, snak końca, wartość w systemie dziesiętnym
 	$zero 		db 4d, "zero", "$", 0d
@@ -631,33 +633,43 @@ code1 segment
 			call print_separator
 
 		recognise_number_x1:
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 10d ;if 10
 			je print_10
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 11d ;if 11
 			je print_11
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 12d ;if 12
 			je print_12
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 13d ;if 13
 			je print_13
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 14d ;if 14
 			je print_14
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 15d ;if 15
 			je print_15
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 16d ;if 16
 			je print_16
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 17d ;if 17
 			je print_17
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 18d ;if 18
 			je print_18
 
+			mov dl, byte ptr ds:[$result]
 			cmp dl, 19d ;if 19
 			je print_19
             
