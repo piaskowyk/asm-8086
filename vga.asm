@@ -1,12 +1,12 @@
 data1 segment
-	$filename db 'asd.bmp', 0
+	$filename db 'a.bmp', 0
 	$filehandle dw ?
 	$header db 54 dup (0)
 	$palette db 256*4 dup (0)
 	$scrLine db 320 dup (0)
 	$errorMsg db 'Error', 13, 10, '$'
 data1 ends
-
+;================================
 code1 segment
 
 run_program:
@@ -15,18 +15,26 @@ size_h equ 200
 color_red equ 1
 
 call turn_on_vga_mode
+call set_ds
 
-mov dx, -1
-loop1:
-	mov cx, 0  ; column
-	inc dx     ; row
-	mov al, color_red
-	loop2: call put_pixel
-		inc cx
-		cmp cx, size_w
-		jne loop2
-	cmp dx, size_h
-	jne loop1
+; Process BMP file
+call open_file
+call read_header
+call read_palette
+call copy_pal
+call copy_bitmap
+
+;mov dx, -1
+;loop1:
+;	mov cx, 0  ; column
+;	inc dx     ; row
+;	mov al, color_red
+;	loop2: call put_pixel
+;		inc cx
+;		cmp cx, size_w
+;		jne loop2
+;	cmp dx, size_h
+;	jne loop1
 
 call wait_for_keypress		
 call turn_on_text_mode
@@ -47,7 +55,7 @@ turn_on_text_mode:
 	ret
 
 wait_for_keypress:
-	mov ah,00
+	mov ah, 00
 	int 16h
 	ret
 
@@ -63,21 +71,20 @@ open_file:
     int 21h
 
     jc openerror
-	call set_ds
-    mov ds:[$filehandle], ax
+    mov word ptr ds:[$filehandle], ax
     ret
 
     openerror:
-    mov dx, offset $errorMsg
-    mov ah, 9h
-    int 21h
+		mov dx, offset $errorMsg
+		mov ah, 9h
+		int 21h
     ret
 
 read_header:
     ; Read BMP file header, 54 bytes
 	call set_ds
     mov ah, 3fh
-    mov bx, ds:[$filehandle]
+    mov bx, word ptr ds:[$filehandle]
     mov cx, 54
     mov dx, offset $header
     int 21h
@@ -103,22 +110,22 @@ copy_pal:
     out dx, al
     ; Copy palette itself to port 3C9h
     inc dx
-    PalLoop:
-    ; Note: Colors in a BMP file are saved as BGR values rather than RGB.
-    mov al, [si+2] ; Get red value.
-    shr al, 2 ; Max. is 255, but video palette maximal
-    ; value is 63. Therefore dividing by 4.
-    out dx, al ; Send it.
-    mov al, [si+1] ; Get green value.
-    shr al, 2
-    out dx, al ; Send it.
-    mov al, [si] ; Get blue value.
-    shr al, 2
-    out dx, al ; Send it.
-    add si, 4 ; Point to next color.
-    ; (There is a null chr. after every color.)
-    loop PalLoop
-    ret
+    pal_loop:
+		; Note: Colors in a BMP file are saved as BGR values rather than RGB.
+		mov al, byte ptr ds:[si+2] ; Get red value.
+		shr al, 2 ; Max. is 255, but video palette maximal
+		; value is 63. Therefore dividing by 4.
+		out dx, al ; Send it.
+		mov al, byte ptr ds:[si+1] ; Get green value.
+		shr al, 2
+		out dx, al ; Send it.
+		mov al, byte ptr ds:[si] ; Get blue value.
+		shr al, 2
+		out dx, al ; Send it.
+		add si, 4 ; Point to next color.
+		; (There is a null chr. after every color.)
+    loop pal_loop
+ret
 
 
 copy_bitmap:
@@ -128,40 +135,35 @@ copy_bitmap:
     mov ax, 0A000h
     mov es, ax
     mov cx, 200
-    PrintBMPLoop:
-    push cx
-    ; di = cx*320, point to the correct screen line
-    mov di,cx
-    shl cx,6
-    shl di,8
-    add di,cx
-    ; Read one line
-    mov ah, 3fh
-    mov cx, 320
-    mov dx, offset ScrLine
-    int 21h
-
-    ; Copy one line into video memory
-
-    cld 
-
-    ; Clear direction flag, for movsb
-
-    mov cx,320
-    mov si,offset ScrLine
-    rep movsb 
-
-    ; Copy line to the screen
-    ;rep movsb is same as the following code:
-    ;mov es:di, ds:si
-    ;inc si
-    ;inc di
-    ;dec cx
-    ;loop until cx=0
-
-    pop cx
-    loop PrintBMPLoop
-    ret
+	
+    print_BMPLoop:
+		push cx
+		; di = cx*320, point to the correct screen line
+		mov di, cx
+		shl cx, 6
+		shl di, 8
+		add di, cx
+		; Read one line
+		mov ah, 3fh
+		mov cx, 320
+		mov dx, offset $scrLine
+		int 21h
+		; Copy one line into video memory
+		cld 
+		; Clear direction flag, for movsb
+		mov cx, 320
+		mov si, offset $scrLine
+		rep movsb 
+		; Copy line to the screen
+		;rep movsb is same as the following code:
+		;mov es:di, ds:si
+		;inc si
+		;inc di
+		;dec cx
+		;loop until cx=0
+		pop cx
+    loop print_BMPLoop
+ret
 	
 set_ds:
 	mov ax, seg $filename

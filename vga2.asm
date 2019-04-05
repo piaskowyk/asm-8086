@@ -1,20 +1,39 @@
 DATA segment
 ;================================
-filename db 'asd.bmp', 0
+filename db 'test.bmp',0
+
 filehandle dw ?
+
 Header db 54 dup (0)
+
 Palette db 256*4 dup (0)
+
 ScrLine db 320 dup (0)
-ErrorMsg db 'Error', 13, 10, '$'
+
+ErrorMsg db 'Error', 13, 10,'$'
 ;================================
 CODE segment
 ;================================
 proc OpenFile
+
     ; Open file
+
     mov ah, 3Dh
     xor al, al
     mov dx, offset filename
-    int 21hproc ReadHeader
+    int 21h
+
+    jc openerror
+    mov [filehandle], ax
+    ret
+
+    openerror:
+    mov dx, offset ErrorMsg
+    mov ah, 9h
+    int 21h
+    ret
+endp OpenFile
+proc ReadHeader
 
     ; Read BMP file header, 54 bytes
 
@@ -125,18 +144,6 @@ proc CopyBitmap
     loop PrintBMPLoop
     ret
 endp CopyBitmap
-
-    jc openerror
-    mov [filehandle], ax
-    ret
-
-    openerror:
-    mov dx, offset ErrorMsg
-    mov ah, 9h
-    int 21h
-    ret
-endp OpenFile
-
 ;================================
 start:
 mov ax, @data
